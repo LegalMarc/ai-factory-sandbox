@@ -59,6 +59,27 @@ def test_main_respects_top(tmp_path, capsys):
     assert "\n  b" not in out
 
 
+def test_main_filters_stopwords_and_min_length(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    stopwords = tmp_path / "stopwords.txt"
+    path.write_text("The cat the dog an ox")
+    stopwords.write_text("  THE\n# short words\n\n dog \n")
+    assert cli.main([str(path), "--stopwords", str(stopwords), "--min-length", "2"]) == 0
+    out = capsys.readouterr().out
+    assert "total words:    1" in out
+    assert "cat" in out
+    assert "the" not in out and "dog" not in out and "ox" not in out
+
+
+def test_main_reports_a_missing_stopwords_file_without_a_traceback(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("the cat")
+    assert cli.main([str(path), "--stopwords", str(tmp_path / "nope.txt")]) == 2
+    err = capsys.readouterr().err
+    assert "wordstats:" in err
+    assert "Traceback" not in err
+
+
 def test_main_reports_a_missing_file_without_a_traceback(tmp_path, capsys):
     assert cli.main([str(tmp_path / "nope.txt")]) == 2
     assert "wordstats:" in capsys.readouterr().err
