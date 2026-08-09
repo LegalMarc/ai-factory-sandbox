@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
 from wordstats import cli
@@ -41,6 +42,29 @@ def test_format_report_on_empty_input():
     assert "(no words)" in cli.format_report(Counter(), top=10)
 
 
+def test_format_json_report_has_expected_keys_and_ordering():
+    report = json.loads(cli.format_json_report(Counter({"pear": 2, "apple": 2, "fig": 3}), top=10))
+    assert set(report) == {"total_words", "distinct_words", "top"}
+    assert report["top"] == [
+        {"word": "fig", "count": 3},
+        {"word": "apple", "count": 2},
+        {"word": "pear", "count": 2},
+    ]
+
+
+def test_format_json_report_respects_top():
+    report = json.loads(cli.format_json_report(Counter({"a": 3, "b": 2}), top=1))
+    assert report["top"] == [{"word": "a", "count": 3}]
+
+
+def test_format_json_report_on_empty_input():
+    assert json.loads(cli.format_json_report(Counter(), top=10)) == {
+        "total_words": 0,
+        "distinct_words": 0,
+        "top": [],
+    }
+
+
 def test_main_happy_path(tmp_path, capsys):
     path = tmp_path / "in.txt"
     path.write_text("red green red blue red green")
@@ -57,6 +81,31 @@ def test_main_respects_top(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "top 1:" in out
     assert "\n  b" not in out
+
+
+def test_main_json_output(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("red green red blue red green")
+    assert cli.main([str(path), "--json", "--top", "2"]) == 0
+    assert json.loads(capsys.readouterr().out) == {
+        "total_words": 6,
+        "distinct_words": 3,
+        "top": [
+            {"word": "red", "count": 3},
+            {"word": "green", "count": 2},
+        ],
+    }
+
+
+def test_main_json_empty_input(tmp_path, capsys):
+    path = tmp_path / "empty.txt"
+    path.write_text("")
+    assert cli.main([str(path), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == {
+        "total_words": 0,
+        "distinct_words": 0,
+        "top": [],
+    }
 
 
 def test_main_reports_a_missing_file_without_a_traceback(tmp_path, capsys):
