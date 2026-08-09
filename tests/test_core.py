@@ -49,6 +49,11 @@ def test_top_n_of_zero_or_negative_is_empty():
     assert core.top_n(counts, -1) == []
 
 
+def test_filter_min_length_keeps_boundary_and_drops_shorter_words():
+    counts = Counter({"bird": 2, "cat": 1, "eagle": 1})
+    assert core.filter_min_length(counts, 4) == Counter({"bird": 2, "eagle": 1})
+
+
 def test_filter_min_length_of_zero_is_a_no_op():
     counts = Counter({"a": 1, "bb": 2})
     assert core.filter_min_length(counts, 0) == counts
