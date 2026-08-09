@@ -60,6 +60,25 @@ def test_filter_min_length_does_not_mutate_its_input():
     assert counts == Counter({"a": 1, "bbbb": 2})
 
 
+def test_filter_stopwords_excludes_words_case_insensitively():
+    counts = Counter({"the": 3, "cat": 2, "DOG": 1})
+    assert core.filter_stopwords(counts, ["The", "dog"]) == Counter({"cat": 2})
+
+
+def test_filter_stopwords_does_not_mutate_its_input():
+    counts = Counter({"the": 2, "cat": 1})
+    core.filter_stopwords(counts, {"the"})
+    assert counts == Counter({"the": 2, "cat": 1})
+
+
+def test_filter_stopwords_and_min_length_are_order_independent():
+    counts = Counter({"the": 2, "cat": 1, "a": 3})
+    stopwords = {"the"}
+    first = core.filter_stopwords(core.filter_min_length(counts, 2), stopwords)
+    second = core.filter_min_length(core.filter_stopwords(counts, stopwords), 2)
+    assert first == second == Counter({"cat": 1})
+
+
 def test_totals():
     counts = core.count_words("a b a")
     assert core.total_words(counts) == 3
