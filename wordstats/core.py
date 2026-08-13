@@ -32,7 +32,7 @@ def filter_min_length(counts: Counter[str], min_length: int) -> Counter[str]:
     """
     if min_length <= 0:
         return Counter(counts)
-    return Counter({word: n for word, n in counts.items() if len(word) > min_length})
+    return Counter({word: n for word, n in counts.items() if len(word) >= min_length})
 
 
 def top_n(counts: Counter[str], n: int) -> list[tuple[str, int]]:
