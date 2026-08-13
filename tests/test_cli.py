@@ -62,3 +62,31 @@ def test_main_respects_top(tmp_path, capsys):
 def test_main_reports_a_missing_file_without_a_traceback(tmp_path, capsys):
     assert cli.main([str(tmp_path / "nope.txt")]) == 2
     assert "wordstats:" in capsys.readouterr().err
+
+
+def test_stopwords_file_excludes_words(tmp_path, capsys):
+    text_path = tmp_path / "in.txt"
+    text_path.write_text("the cat sat on the mat")
+    stop_path = tmp_path / "stop.txt"
+    stop_path.write_text("the\non\n")
+    assert cli.main([str(text_path), "--stopwords", str(stop_path)]) == 0
+    out = capsys.readouterr().out
+    assert "total words:    3" in out
+    assert "\n  the " not in out
+
+
+def test_stopwords_file_ignores_blank_lines_and_comments(tmp_path, capsys):
+    text_path = tmp_path / "in.txt"
+    text_path.write_text("the cat sat")
+    stop_path = tmp_path / "stop.txt"
+    stop_path.write_text("# common filler words\n\nThe\n\n")
+    assert cli.main([str(text_path), "--stopwords", str(stop_path)]) == 0
+    out = capsys.readouterr().out
+    assert "total words:    2" in out
+
+
+def test_stopwords_file_missing_reports_error_without_traceback(tmp_path, capsys):
+    text_path = tmp_path / "in.txt"
+    text_path.write_text("cat sat")
+    assert cli.main([str(text_path), "--stopwords", str(tmp_path / "nope.txt")]) == 2
+    assert "wordstats:" in capsys.readouterr().err

@@ -35,6 +35,18 @@ def filter_min_length(counts: Counter[str], min_length: int) -> Counter[str]:
     return Counter({word: n for word, n in counts.items() if len(word) > min_length})
 
 
+def filter_stopwords(counts: Counter[str], stopwords) -> Counter[str]:
+    """Drop every word in `stopwords` from `counts`.
+
+    Matching is case-insensitive, mirroring how `count_words` already lowercases every token.
+    """
+    lowered = {word.lower() for word in stopwords}
+    for word in lowered:
+        if word in counts:
+            del counts[word]
+    return counts
+
+
 def top_n(counts: Counter[str], n: int) -> list[tuple[str, int]]:
     """The `n` most frequent words, most frequent first.
 

@@ -28,6 +28,18 @@ def read_texts(paths: Sequence[str]) -> str:
     return "\n".join(chunks)
 
 
+def read_stopwords(path: str) -> set[str]:
+    """Parse a stopwords file: one word per line, blank lines and `#` comments ignored."""
+    text = Path(path).read_text(encoding="utf-8")
+    words = set()
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        words.add(line.lower())
+    return words
+
+
 def format_report(counts, top: int) -> str:
     """Human-readable report: totals, then the top-N table."""
     lines = [
@@ -65,6 +77,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="ignore words shorter than this many characters (default: 0, keep everything)",
     )
+    parser.add_argument(
+        "--stopwords",
+        metavar="FILE",
+        default=None,
+        help="exclude words listed in FILE (one per line; blank lines and # comments ignored)",
+    )
     return parser
 
 
@@ -78,6 +96,15 @@ def main(argv: list[str] | None = None) -> int:
 
     counts = core.count_words(text)
     counts = core.filter_min_length(counts, args.min_length)
+
+    if args.stopwords:
+        try:
+            stopwords = read_stopwords(args.stopwords)
+        except OSError as exc:
+            print(f"wordstats: {exc}", file=sys.stderr)
+            return 2
+        counts = core.filter_stopwords(counts, stopwords)
+
     print(format_report(counts, args.top))
     return 0
 
