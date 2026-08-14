@@ -7,6 +7,7 @@ logic out of here is what lets the test suite cover behaviour without spawning a
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -47,6 +48,16 @@ def format_report(counts, top: int) -> str:
     return "\n".join(lines)
 
 
+def format_json_report(counts, top: int) -> str:
+    """JSON report with totals and the top-N ranking."""
+    report = {
+        "total_words": core.total_words(counts),
+        "distinct_words": core.distinct_words(counts),
+        "top": [{"word": word, "count": n} for word, n in core.top_n(counts, top)],
+    }
+    return json.dumps(report)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="wordstats",
@@ -65,6 +76,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="ignore words shorter than this many characters (default: 0, keep everything)",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="format the report as JSON",
+    )
     return parser
 
 
@@ -78,7 +94,8 @@ def main(argv: list[str] | None = None) -> int:
 
     counts = core.count_words(text)
     counts = core.filter_min_length(counts, args.min_length)
-    print(format_report(counts, args.top))
+    report = format_json_report(counts, args.top) if args.json else format_report(counts, args.top)
+    print(report)
     return 0
 
 
