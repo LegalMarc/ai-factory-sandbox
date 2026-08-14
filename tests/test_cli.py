@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
 from wordstats import cli
@@ -62,3 +63,43 @@ def test_main_respects_top(tmp_path, capsys):
 def test_main_reports_a_missing_file_without_a_traceback(tmp_path, capsys):
     assert cli.main([str(tmp_path / "nope.txt")]) == 2
     assert "wordstats:" in capsys.readouterr().err
+
+
+def test_json_output_has_the_required_key_set(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("red green red blue")
+    assert cli.main([str(path), "--json"]) == 0
+    obj = json.loads(capsys.readouterr().out)
+    assert set(obj.keys()) == {"total_words", "distinct_words", "top"}
+    assert obj["total_words"] == 4
+    assert obj["distinct_words"] == 3
+
+
+def test_json_output_orders_top_by_frequency_then_alphabetically(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("pear apple fig pear apple pear")
+    assert cli.main([str(path), "--json"]) == 0
+    obj = json.loads(capsys.readouterr().out)
+    assert obj["top"] == [
+        {"word": "pear", "count": 3},
+        {"word": "apple", "count": 2},
+        {"word": "fig", "count": 1},
+    ]
+
+
+def test_json_output_respects_top(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("a a a b b c")
+    assert cli.main([str(path), "--json", "--top", "1"]) == 0
+    obj = json.loads(capsys.readouterr().out)
+    assert obj["top"] == [{"word": "a", "count": 3}]
+
+
+def test_json_output_on_empty_input_is_zeroed_not_the_human_string(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("")
+    assert cli.main([str(path), "--json"]) == 0
+    out = capsys.readouterr().out
+    assert "(no words)" not in out
+    obj = json.loads(out)
+    assert obj == {"total_words": 0, "distinct_words": 0, "top": []}
