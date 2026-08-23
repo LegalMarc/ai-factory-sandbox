@@ -12,7 +12,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from wordstats import core
+from wordstats import __version__, core
 
 
 def read_texts(paths: Sequence[str]) -> str:
@@ -63,6 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="wordstats",
         description="Count word frequencies across text files.",
     )
+    parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("paths", nargs="*", help="text files to read (default: stdin)")
     parser.add_argument(
         "--top",
