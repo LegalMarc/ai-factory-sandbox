@@ -26,6 +26,13 @@ top 5:
 | `--top N` | how many of the most frequent words to show (default: 10) |
 | `--min-length N` | ignore words shorter than N characters (default: 0, keep everything) |
 
+## Examples
+
+```bash
+wordstats notes.txt --top 3 --min-length 4
+cat essay.txt | wordstats --min-length 6
+```
+
 ## Layout
 
 `wordstats/core.py` holds the pure functions — tokenizing, counting, ranking — and knows nothing
