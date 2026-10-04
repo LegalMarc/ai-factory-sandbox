@@ -81,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="format the report as JSON",
     )
+    parser.add_argument(
+        "--total-only",
+        action="store_true",
+        help="print only the total word count as a bare integer",
+    )
     return parser
 
 
@@ -94,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
 
     counts = core.count_words(text)
     counts = core.filter_min_length(counts, args.min_length)
+    if args.total_only:
+        print(core.total_words(counts))
+        return 0
     report = format_json_report(counts, args.top) if args.json else format_report(counts, args.top)
     print(report)
     return 0

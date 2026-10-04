@@ -111,3 +111,25 @@ def test_main_json_empty_input(tmp_path, capsys):
 def test_main_reports_a_missing_file_without_a_traceback(tmp_path, capsys):
     assert cli.main([str(tmp_path / "nope.txt")]) == 2
     assert "wordstats:" in capsys.readouterr().err
+
+
+def test_main_total_only_reads_stdin(monkeypatch, capsys):
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("a b b"))
+    assert cli.main(["--total-only"]) == 0
+    assert capsys.readouterr().out == "3\n"
+
+
+def test_main_total_only_with_a_file(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("a b b")
+    assert cli.main([str(path), "--total-only"]) == 0
+    assert capsys.readouterr().out == "3\n"
+
+
+def test_main_total_only_respects_min_length(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("a bb ccc")
+    assert cli.main([str(path), "--total-only", "--min-length", "2"]) == 0
+    assert capsys.readouterr().out == "2\n"
