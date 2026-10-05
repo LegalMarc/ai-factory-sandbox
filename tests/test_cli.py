@@ -133,3 +133,25 @@ def test_main_total_only_respects_min_length(tmp_path, capsys):
     path.write_text("a bb ccc")
     assert cli.main([str(path), "--total-only", "--min-length", "2"]) == 0
     assert capsys.readouterr().out == "2\n"
+
+
+def test_main_lines_reads_stdin(monkeypatch, capsys):
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("a\n\n  \nb c\n"))
+    assert cli.main(["--lines"]) == 0
+    assert capsys.readouterr().out == "2\n"
+
+
+def test_main_lines_with_a_file(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("a\n\nb c\n")
+    assert cli.main([str(path), "--lines"]) == 0
+    assert capsys.readouterr().out == "2\n"
+
+
+def test_main_lines_counts_whitespace_only_lines_as_empty(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("hello\n   \n\t\nworld")
+    assert cli.main([str(path), "--lines"]) == 0
+    assert capsys.readouterr().out == "2\n"
