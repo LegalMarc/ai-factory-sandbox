@@ -177,3 +177,25 @@ def test_main_chars_whitespace_only(tmp_path, capsys):
     path.write_text("   \n\t\n  ")
     assert cli.main([str(path), "--chars"]) == 0
     assert capsys.readouterr().out == "0\n"
+
+
+def test_main_longest_reads_stdin(monkeypatch, capsys):
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("ab cde\n\n f\n"))
+    assert cli.main(["--longest"]) == 0
+    assert capsys.readouterr().out == "3\n"
+
+
+def test_main_longest_with_a_file(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("ab cde\n\n f\n")
+    assert cli.main([str(path), "--longest"]) == 0
+    assert capsys.readouterr().out == "3\n"
+
+
+def test_main_longest_whitespace_only(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("   \n\t\n  ")
+    assert cli.main([str(path), "--longest"]) == 0
+    assert capsys.readouterr().out == "0\n"
