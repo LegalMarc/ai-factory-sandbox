@@ -155,3 +155,25 @@ def test_main_lines_counts_whitespace_only_lines_as_empty(tmp_path, capsys):
     path.write_text("hello\n   \n\t\nworld")
     assert cli.main([str(path), "--lines"]) == 0
     assert capsys.readouterr().out == "2\n"
+
+
+def test_main_chars_reads_stdin(monkeypatch, capsys):
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("ab c\n\n d\n"))
+    assert cli.main(["--chars"]) == 0
+    assert capsys.readouterr().out == "4\n"
+
+
+def test_main_chars_with_a_file(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("ab c\n\n d\n")
+    assert cli.main([str(path), "--chars"]) == 0
+    assert capsys.readouterr().out == "4\n"
+
+
+def test_main_chars_whitespace_only(tmp_path, capsys):
+    path = tmp_path / "in.txt"
+    path.write_text("   \n\t\n  ")
+    assert cli.main([str(path), "--chars"]) == 0
+    assert capsys.readouterr().out == "0\n"
