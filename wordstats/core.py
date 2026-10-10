@@ -66,3 +66,8 @@ def count_lines(text: str) -> int:
 def count_chars(text: str) -> int:
     """Number of non-whitespace characters in `text`."""
     return sum(1 for char in text if not char.isspace())
+
+
+def longest_word(text: str) -> int:
+    """Length of the longest whitespace-separated word; 0 for empty input."""
+    return max((len(word) for word in text.split()), default=0)
