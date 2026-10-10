@@ -61,3 +61,8 @@ def distinct_words(counts: Counter[str]) -> int:
 def count_lines(text: str) -> int:
     """Number of non-empty lines in `text`; a line of only whitespace is empty."""
     return sum(1 for line in text.splitlines() if line.strip())
+
+
+def count_chars(text: str) -> int:
+    """Number of non-whitespace characters in `text`."""
+    return sum(1 for char in text if not char.isspace())

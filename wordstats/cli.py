@@ -91,6 +91,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="print only the number of non-empty lines as a bare integer",
     )
+    parser.add_argument(
+        "--chars",
+        action="store_true",
+        help="print only the number of non-whitespace characters as a bare integer",
+    )
     return parser
 
 
@@ -106,6 +111,9 @@ def main(argv: list[str] | None = None) -> int:
     counts = core.filter_min_length(counts, args.min_length)
     if args.lines:
         print(core.count_lines(text))
+        return 0
+    if args.chars:
+        print(core.count_chars(text))
         return 0
     if args.total_only:
         print(core.total_words(counts))
