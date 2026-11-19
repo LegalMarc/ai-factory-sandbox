@@ -24,4 +24,4 @@ def round_half_up(value, places):
     if rounded == 0:
         rounded = abs(rounded)
 
-    return str(rounded)
+    return format(rounded, "f")
