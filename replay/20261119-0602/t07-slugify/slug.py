@@ -3,8 +3,7 @@ import unicodedata
 
 
 def slugify(text):
-    normalized = unicodedata.normalize("NFKD", text)
-    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
-    ascii_text = ascii_text.lower()
-    slug = re.sub(r"[^a-z0-9]+", "-", ascii_text)
+    normalized = unicodedata.normalize("NFKD", text).lower()
+    stripped = "".join(char for char in normalized if not unicodedata.combining(char))
+    slug = re.sub(r"[^a-z0-9]+", "-", stripped)
     return slug.strip("-")
