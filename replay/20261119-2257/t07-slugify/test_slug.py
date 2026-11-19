@@ -16,6 +16,11 @@ class TestSlugify(unittest.TestCase):
         self.assertEqual(slugify("über"), "uber")
         self.assertEqual(slugify("Crème Brûlée"), "creme-brulee")
 
+    def test_non_ascii_separators_become_dash(self):
+        self.assertEqual(slugify("Hello—World"), "hello-world")
+        self.assertEqual(slugify("a€b"), "a-b")
+        self.assertEqual(slugify("aøb"), "a-b")
+
     def test_no_leading_trailing_dash(self):
         self.assertEqual(slugify("--Hello--"), "hello")
         self.assertEqual(slugify("  hi  "), "hi")
