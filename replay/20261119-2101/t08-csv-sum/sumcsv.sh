@@ -10,7 +10,7 @@ NR==1 {next}
   rows++
   total += $2 * $3
 }
-END { printf "%d %s", rows+0, total+0 }
+END { printf "%d %.15g", rows+0, total+0 }
 ')
 read -r rows total <<< "$result"
 rows=${rows:-0}
